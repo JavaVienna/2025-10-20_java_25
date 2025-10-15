@@ -4,3 +4,5 @@
 leyden-image
 .vscode
 .idea
+*.jar
+*.war
