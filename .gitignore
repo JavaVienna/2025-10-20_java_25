@@ -6,3 +6,4 @@ leyden-image
 .idea
 *.jar
 *.war
+*.aotconfig
