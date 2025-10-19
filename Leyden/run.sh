@@ -39,18 +39,28 @@ java -XX:AOTMode=create -XX:AOTConfiguration="$AOT_CONFIG" \
 echo ""
 echo "6️⃣  Running $ROUNDS times with AOT cache..."
 total=0
+total_external=0
 for i in $(seq 1 $ROUNDS); do
+  start=$(date +%s%N)
   output=$(java -XX:AOTCache="$AOT_CACHE" -cp "$APP_JAR" "$APP_CLASS")
+  end=$(date +%s%N)
+  external_time=$(( (end - start) / 1000000 ))
+  total_external=$((total_external + external_time))
+
 #  echo "$output"
   # Extract the time from output like "OK 91 1024 took=86ms"
   time=$(echo "$output" | grep -oE 'took=[0-9]+' | grep -oE '[0-9]+')
   total=$((total + time))
 done
 avg=$((total / ROUNDS))
+avg_external=$((total_external / ROUNDS))
+overhead=$((total_external - total))
+avg_overhead=$((avg_external - avg))
 
 echo ""
-echo "📊 Runtime Statistics (Program Execution Time):"
-echo "   Total: ${total} ms"
-echo "   Average: ${avg} ms per run"
+echo "📊 Runtime Statistics (with AOT cache):"
+echo "   Internal time: total ${total} ms | avg ${avg} ms per run"
+echo "   Total time:    total ${total_external} ms | avg ${avg_external} ms per run"
+echo "   JVM overhead:  total ${overhead} ms | avg ${avg_overhead} ms per run"
 echo ""
 echo " ✅ Done. Completed $ROUNDS runs with AOT optimization."

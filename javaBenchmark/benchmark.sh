@@ -23,15 +23,27 @@ for v in "${VERSIONS[@]}"; do
 
   echo "▶️ Running $APP $ROUNDS times..."
   total=0
+  total_external=0
   for i in $(seq 1 $ROUNDS); do
+    start=$(date +%s%N)
     output=$(java "$APP")
+    end=$(date +%s%N)
+    external_time=$(( (end - start) / 1000000 ))
+    total_external=$((total_external + external_time))
+
     # Extract the time from output like "OK 91 1024 took=86ms"
     time=$(echo "$output" | grep -oE 'took=[0-9]+' | grep -oE '[0-9]+')
     total=$((total + time))
   done
   avg=$((total / ROUNDS))
+  avg_external=$((total_external / ROUNDS))
+  overhead=$((total_external - total))
+  avg_overhead=$((avg_external - avg))
 
-  echo "📊 Java $v: total ${total} ms | avg ${avg} ms per run"
+  echo "📊 Java $v:"
+  echo "   Internal time: total ${total} ms | avg ${avg} ms per run"
+  echo "   Total time:    total ${total_external} ms | avg ${avg_external} ms per run"
+  echo "   JVM overhead:  total ${overhead} ms | avg ${avg_overhead} ms per run"
   echo
 done
 
