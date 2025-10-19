@@ -8,9 +8,9 @@ else
   exit 1
 fi
 
-APP="aot"
+APP="JavaBenchmark"
 ROUNDS=50
-VERSIONS=("17.0.8-amzn" "21.0.8-amzn" "25-amzn")
+VERSIONS=("17.0.16-amzn" "21.0.8-amzn" "25-amzn")
 
 echo "🏁 Benchmarking $APP.java for $ROUNDS runs each..."
 echo
@@ -22,15 +22,16 @@ for v in "${VERSIONS[@]}"; do
   javac "$APP.java" || { echo "Compilation failed for Java $v"; exit 1; }
 
   echo "▶️ Running $APP $ROUNDS times..."
-  start=$(date +%s%N)
+  total=0
   for i in $(seq 1 $ROUNDS); do
-    java "$APP" > /dev/null
+    output=$(java "$APP")
+    # Extract the time from output like "OK 91 1024 took=86ms"
+    time=$(echo "$output" | grep -oE 'took=[0-9]+' | grep -oE '[0-9]+')
+    total=$((total + time))
   done
-  end=$(date +%s%N)
-  elapsed=$(( (end - start) / 1000000 ))
-  avg=$(( elapsed / ROUNDS ))
+  avg=$((total / ROUNDS))
 
-  echo "📊 Java $v: total ${elapsed} ms | avg ${avg} ms per run"
+  echo "📊 Java $v: total ${total} ms | avg ${avg} ms per run"
   echo
 done
 

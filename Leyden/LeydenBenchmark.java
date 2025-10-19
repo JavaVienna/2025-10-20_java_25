@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class aot {
+public class LeydenBenchmark {
     public static void main(String[] args) throws Exception {
         long t0 = System.nanoTime();
 

@@ -10,8 +10,8 @@ else
   exit 1
 fi
 
-echo "🔄 Switching to Java 26.ea.19-open"
-sdk use java  26.ea.19-open
+echo "🔄 Switching to Java 25"
+sdk use java 25-open
 
 APP_CLASS="LeydenBenchmark"
 APP_JAR="LeydenBenchmark.jar"

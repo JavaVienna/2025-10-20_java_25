@@ -12,7 +12,7 @@ APP="CohBench"
 SRC="${APP}.java"
 N="${N:-10000000}"                 # can override: N=20000000 ./run.sh
 HEAP="${HEAP:-2g}"                 # fixed heap to reduce GC noise
-VERSIONS=("17.0.8-amzn" "21.0.8-amzn" "25-amzn")
+VERSIONS=("17.0.16-amzn" "21.0.8-amzn" "25-amzn")
 
 for v in "${VERSIONS[@]}"; do
 

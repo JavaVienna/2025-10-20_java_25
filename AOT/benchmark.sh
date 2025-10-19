@@ -9,34 +9,40 @@ fi
 echo "🔄 Switching to Java 25"
 sdk use java 25-amzn >/dev/null
 
-echo "🧪 Running 50 runs WITHOUT AOT..."
-start_no_aot=$(date +%s%N)
-for i in {1..50}; do
-  java aot > /dev/null
-done
-end_no_aot=$(date +%s%N)
-elapsed_no_aot=$(( (end_no_aot - start_no_aot) / 1000000 ))
+ROUNDS=50
 
-echo "⏱️  Without AOT total: ${elapsed_no_aot} ms (avg $((elapsed_no_aot / 50)) ms per run)"
+echo "🧪 Running $ROUNDS runs WITHOUT AOT..."
+total_no_aot=0
+for i in $(seq 1 $ROUNDS); do
+  output=$(java AotBenchMark)
+  # Extract the time from output like "OK 91 1024 took=86ms"
+  time=$(echo "$output" | grep -oE 'took=[0-9]+' | grep -oE '[0-9]+')
+  total_no_aot=$((total_no_aot + time))
+done
+avg_no_aot=$((total_no_aot / ROUNDS))
+
+echo "⏱️  Without AOT total: ${total_no_aot} ms (avg ${avg_no_aot} ms per run)"
 
 echo ""
-echo "⚡ Running 50 runs WITH AOT..."
-start_aot=$(date +%s%N)
-for i in {1..50}; do
-  java -XX:AOTCache=aot.aot aot > /dev/null
+echo "⚡ Running $ROUNDS runs WITH AOT..."
+total_aot=0
+for i in $(seq 1 $ROUNDS); do
+  output=$(java -XX:AOTCache=AotBenckmark.aot AotBenchMark)
+  # Extract the time from output like "OK 91 1024 took=86ms"
+  time=$(echo "$output" | grep -oE 'took=[0-9]+' | grep -oE '[0-9]+')
+  total_aot=$((total_aot + time))
 done
-end_aot=$(date +%s%N)
-elapsed_aot=$(( (end_aot - start_aot) / 1000000 ))
+avg_aot=$((total_aot / ROUNDS))
 
-echo "🚀 With AOT total: ${elapsed_aot} ms (avg $((elapsed_aot / 50)) ms per run)"
+echo "🚀 With AOT total: ${total_aot} ms (avg ${avg_aot} ms per run)"
 
 echo ""
 echo "📊 Summary:"
-echo "   Without AOT: ${elapsed_no_aot} ms"
-echo "   With AOT:    ${elapsed_aot} ms"
-diff=$((elapsed_no_aot - elapsed_aot))
+echo "   Without AOT: ${total_no_aot} ms (avg ${avg_no_aot} ms)"
+echo "   With AOT:    ${total_aot} ms (avg ${avg_aot} ms)"
+diff=$((total_no_aot - total_aot))
 if [ $diff -gt 0 ]; then
-  echo "   ✅ AOT faster by ${diff} ms total (~$((diff / 50)) ms per run)"
+  echo "   ✅ AOT faster by ${diff} ms total (~$((diff / ROUNDS)) ms per run)"
 else
   echo "   ⚠️ No visible improvement (${diff} ms difference)"
 fi
