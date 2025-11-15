@@ -9,3 +9,5 @@
 ## Description
 
 Overview of new features and improvements in Java 25.
+
+This repository contains source files for the Leyden and Java 25 presentation.
